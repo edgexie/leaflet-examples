@@ -1,0 +1,1 @@
+- non-geographical-map.html leaflet 加载图片
