@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.7.1/leaflet.min.css"
+    />
+    <script src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.7.1/leaflet.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/zrender/5.2.1/zrender.js"></script>
+    <style>
+      * {
+        margin: 0;
+      }
+      html,
+      body,
+      .map-wrapper,
+      #map {
+        height: 100%;
+        width: 100%;
+      }
+      .map-wrapper {
+        position: relative;
+      }
+      .image-coordinates-container {
+        position: absolute;
+        left: 8px;
+        bottom: 8px;
+        z-index: 1000;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="map-wrapper">
+      <div id="map"></div>
+      <div id="imageCoordinates" class="image-coordinates-container"></div>
+    </div>
+    <script>
+      const myRenderer = L.canvas({ padding: 0 });
+      const center = [37.6978, 112.70788];
+      const map = L.map('map', {
+        center,
+        zoom: 10,
+      });
+      L.tileLayer(
+        'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
+        {
+          subdomains: '1234',
+          maxZoom: 21,
+          minZoom: 3,
+          coordType: 'gcj02',
+        }
+      ).addTo(map);
+      myRenderer.addTo(map);
+      const { x: cx, y: cy } = map.latLngToContainerPoint(center);
+      const { _ctx: ctx, _container: container } = myRenderer;
+      const zr = zrender.init(container);
+
+      const circle = new zrender.Circle({
+        shape: {
+          cx,
+          cy,
+          r: 20,
+        },
+        style: {
+          fill: 'transparent',
+          stroke: 'red',
+        },
+        silent: true,
+      });
+      zr.add(circle);
+
+      const animator = circle
+        .animate('shape', true)
+        .when(1000, { r: 0 })
+        .when(2000, { r: 20 })
+        .start();
+      myRenderer.on('update', ({ target }) => {
+        const { x: cx, y: cy } = map.latLngToContainerPoint([
+          37.6978, 112.70788,
+        ]);
+        circle.attr({
+          shape: {
+            cx,
+            cy,
+          },
+        });
+      });
+    </script>
+  </body>
+</html>
